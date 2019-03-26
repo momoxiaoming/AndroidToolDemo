@@ -1,10 +1,11 @@
-package com.andr.common.tool.net;
+package com.andr.common.tool.net.okhttp;
 
 import android.content.Context;
 import android.os.Handler;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -16,12 +17,15 @@ import okhttp3.OkHttpClient;
 
 public class HttpManager
 {
+    public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");//mdiatype
+    public static final MediaType MEDIA_TYPE_STREAM = MediaType.parse("application/octet-stream");//mdiatype
 
 
     private static volatile HttpManager mIntence;
     private Context context;
     private OkHttpImpl okHttpImpl;
 
+    private OkHttpClient mOkHttpClient;
     private Handler okHttpHandler;
 
     public static HttpManager getInstance(Context context)
@@ -43,11 +47,18 @@ public class HttpManager
     {
         this.context = context;
 
-
+        //初始化OkHttpClient
+        mOkHttpClient = new OkHttpClient().newBuilder()
+                .addInterceptor(new RetryInterceptor(1))
+                .connectTimeout(5, TimeUnit.SECONDS)//设置连接超时时间
+                .readTimeout(5, TimeUnit.SECONDS)//设置读取超时时间
+                .writeTimeout(5, TimeUnit.SECONDS)//设置写入超时时间
+                .build();
         //初始化Handler
         okHttpHandler = new Handler(context.getMainLooper());
 
         okHttpImpl = OkHttpImpl.getInstance();
+        okHttpImpl.initData(mOkHttpClient, okHttpHandler);
 
     }
 
@@ -116,9 +127,9 @@ public class HttpManager
      * @param uplodUrl
      * @param callBack
      */
-    public void FILE_ASY_UPLOAD(File file, String uplodUrl, NetCallBack.FileStateCallBack callBack)
+    public void FILE_ASY_UPLOAD(String params,File file, String uplodUrl, NetCallBack.FileStateCallBack callBack)
     {
-        okHttpImpl.upLoadFile(file, uplodUrl, callBack);
+        okHttpImpl.upLoadFile(params,file, uplodUrl, callBack);
     }
 
 }

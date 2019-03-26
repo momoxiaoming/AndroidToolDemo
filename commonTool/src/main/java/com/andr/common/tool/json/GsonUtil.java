@@ -1,4 +1,4 @@
-package com.andr.common.tool.util;
+package com.andr.common.tool.json;
 
 import android.text.TextUtils;
 
@@ -6,26 +6,18 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
-/**
- * <pre>
- *     author: momoxiaoming
- *     blog  : http://blog.momoxiaoming.com
- *     time  : 2019/2/27
- *     desc  : new class
- * </pre>
- */
-public class GsonUtil
+public final class GsonUtil 
 {
     public static  <T> T parseJsonWithGson(String jsonData, Class<T> type) throws Exception
     {
         T rlt = null;
-
+        
         if(!TextUtils.isEmpty(jsonData) && null != type)
         {
             Gson gson = new Gson();
             rlt = gson.fromJson(jsonData, type);
         }
-
+        
         return rlt;
     }
 
@@ -40,8 +32,8 @@ public class GsonUtil
 
         return rlt;
     }
-
-    public static  String toJsonStringWithGson(Object src)
+    
+    public static  String toJsonStringWithGson(Object src) throws  Exception
     {
         String rlt = null;
 

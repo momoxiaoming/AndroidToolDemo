@@ -1,5 +1,9 @@
-package com.andr.common.tool.net;
+package com.andr.common.tool.net.okhttp;
 
+import android.os.Handler;
+
+import com.andr.common.tool.net.okhttp.NetCallBack.FileStateCallBack;
+import com.andr.common.tool.net.okhttp.NetCallBack.ReqCallBack;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -8,11 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -23,7 +28,9 @@ import okio.BufferedSink;
 import okio.Okio;
 import okio.Source;
 
-
+import static com.andr.common.tool.net.okhttp.HttpManager.MEDIA_TYPE_JSON;
+import static com.andr.common.tool.net.okhttp.HttpManager.MEDIA_TYPE_STREAM;
+import static java.lang.String.valueOf;
 
 
 /**
@@ -31,34 +38,45 @@ import okio.Source;
  * Created by zhangxiaoming on 2019/1/3.
  */
 
-public class OkHttpImpl {
-    public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");//mdiatype
-    public static final MediaType MEDIA_TYPE_STREAM = MediaType.parse("application/octet-stream");//mdiatype
+public class OkHttpImpl
+{
 
     // 这个需要和服务端保持一致
     private static final String TAG = OkHttpImpl.class.getSimpleName();
     private static volatile OkHttpImpl mInstance;//单利引用
     private OkHttpClient mOkHttpClient;//okHttpClient 实例
+    private Handler okHttpHandler;//全局处理子线程和M主线程通信
+
     private HashMap<String, String> mHeaderMap = null;
-
-
 
     /**
      * 请求的类型
      */
-    enum ReqType {
-        TYPE_GET,
-        TYPE_POST_JSON,
+    enum ReqType
+    {
+        TYPE_GET, TYPE_POST_JSON,
     }
 
 
+    /**
+     * 初始化RequestManager
+     */
+
+
+    public void initData(OkHttpClient client, Handler handler)
+    {
+        this.mOkHttpClient = client;
+        this.okHttpHandler = handler;
+
+    }
 
     /**
      * 设置头信息
      *
      * @param map
      */
-    public void setHeaders(HashMap<String, String> map) {
+    public void setHeaders(HashMap<String, String> map)
+    {
 
         this.mHeaderMap = map;
     }
@@ -69,12 +87,16 @@ public class OkHttpImpl {
      *
      * @return
      */
-    public static OkHttpImpl getInstance() {
+    public static OkHttpImpl getInstance()
+    {
         OkHttpImpl inst = mInstance;
-        if (inst == null) {
-            synchronized (OkHttpImpl.class) {
+        if (inst == null)
+        {
+            synchronized (OkHttpImpl.class)
+            {
                 inst = mInstance;
-                if (inst == null) {
+                if (inst == null)
+                {
                     inst = new OkHttpImpl();
                     mInstance = inst;
                 }
@@ -83,24 +105,18 @@ public class OkHttpImpl {
         return inst;
     }
 
-
-    public OkHttpImpl() {
-        mOkHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(5, TimeUnit.SECONDS)//设置超时时间
-                .readTimeout(5, TimeUnit.SECONDS)//设置读取超时时间
-                .writeTimeout(5, TimeUnit.SECONDS)//设置写入超时时间
-                .build();
-    }
-
     /**
      * 统一为请求添加头信息
      *
      * @return
      */
-    private Request.Builder addHeaders() {
+    private Request.Builder addHeaders()
+    {
         Request.Builder builder = new Request.Builder();
-        if (mHeaderMap != null) {
-            for (String key : mHeaderMap.keySet()) {
+        if (mHeaderMap != null)
+        {
+            for (String key : mHeaderMap.keySet())
+            {
                 builder.addHeader(key, mHeaderMap.get(key));
             }
         }
@@ -116,9 +132,11 @@ public class OkHttpImpl {
      * @param reqType    请求类型
      * @param jsonParams 请求参数 json 字符串
      */
-    public String requestSyn(String actionUrl, ReqType reqType, String jsonParams) {
+    public String requestSyn(String actionUrl, ReqType reqType, String jsonParams)
+    {
         String res = null;
-        switch (reqType) {
+        switch (reqType)
+        {
             case TYPE_GET:
                 res = requestGetBySyn(actionUrl, new Gson().fromJson(jsonParams, HashMap.class));
                 break;
@@ -138,8 +156,10 @@ public class OkHttpImpl {
      * @param reqParams 请求参数
      * @param callBack  请求返回数据回调
      **/
-    public void requestAsyn(String actionUrl, ReqType reqType, String reqParams, NetCallBack.ReqCallBack callBack) {
-        switch (reqType) {
+    public void requestAsyn(String actionUrl, ReqType reqType, String reqParams, NetCallBack.ReqCallBack callBack)
+    {
+        switch (reqType)
+        {
             case TYPE_GET:
                 requestGetByAsyn(actionUrl, new Gson().fromJson(reqParams, HashMap.class), callBack);
                 break;
@@ -158,23 +178,28 @@ public class OkHttpImpl {
      * @param fileName          保存的文件名
      * @param FileStateCallBack 回调
      */
-    public void downFileForAsy(final String url, final String filePath, final String fileName, final
-    NetCallBack.FileStateCallBack FileStateCallBack) {
-        try {
+    public void downFileForAsy(final String url, final String filePath, final String fileName, final NetCallBack.FileStateCallBack FileStateCallBack)
+    {
+        try
+        {
             Request request = addHeaders().url(url).build();
             Call call = mOkHttpClient.newCall(request);
 
-            call.enqueue(new Callback() {
+            call.enqueue(new Callback()
+            {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(Call call, IOException e)
+                {
                     // 下载失败
                     errorCallBack("接口访问失败", FileStateCallBack);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException
+                {
 
-                    if (!response.isSuccessful()) {
+                    if (!response.isSuccessful())
+                    {
                         errorCallBack("请求失败", FileStateCallBack);
                         return;
                     }
@@ -186,13 +211,15 @@ public class OkHttpImpl {
                     // 储存下载文件的目录
                     File file = null;
 
-                    try {
+                    try
+                    {
                         is = response.body().byteStream();
                         long total = response.body().contentLength();
                         file = new File(filePath, fileName);
                         fos = new FileOutputStream(file);
                         long sum = 0;
-                        while ((len = is.read(buf)) != -1) {
+                        while ((len = is.read(buf)) != -1)
+                        {
                             fos.write(buf, 0, len);
                             sum += len;
                             // 下载中
@@ -201,22 +228,29 @@ public class OkHttpImpl {
                         fos.flush();
                         // 下载完成
                         finshCallBack(file, FileStateCallBack);
-                    } catch (Exception e) {
+                    } catch (Exception e)
+                    {
                         e.printStackTrace();
                         errorCallBack("文件下载异常", FileStateCallBack);
-                        if (file != null) {
+                        if (file != null)
+                        {
                             file.delete();
                         }
-                    } finally {
-                        try {
+                    } finally
+                    {
+                        try
+                        {
                             if (is != null)
                                 is.close();
-                        } catch (IOException e) {
+                        } catch (IOException e)
+                        {
                         }
-                        try {
+                        try
+                        {
                             if (fos != null)
                                 fos.close();
-                        } catch (IOException e) {
+                        } catch (IOException e)
+                        {
                         }
                     }
 
@@ -224,7 +258,8 @@ public class OkHttpImpl {
                 }
 
             });
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             errorCallBack("接口请求出错", FileStateCallBack);
 
@@ -240,29 +275,52 @@ public class OkHttpImpl {
      * @param uplodUrl
      * @param callBack
      */
-    public void upLoadFile(final File file, String uplodUrl, final NetCallBack.FileStateCallBack callBack) {
-        try {
-            RequestBody fileBody = createProgressRequestBody(MEDIA_TYPE_STREAM, file, callBack);
+    public void upLoadFile(String params, final File file, String uplodUrl, final NetCallBack.FileStateCallBack callBack)
+    {
+        if (file == null)
+        {
+
+            callBack.onError("上传的文件为空!");
+            return;
+        }
+
+        try
+        {
+            HashMap map = null;
+            if (params != null && !"".equals(params))
+            {
+                map = new Gson().fromJson(params, HashMap.class);
+            }
+
+            RequestBody fileBody = createProgressRequestBody(map, MEDIA_TYPE_STREAM, file, callBack);
             final Request request = addHeaders().url(uplodUrl).post(fileBody).build();
+
             //创建一个Call
             Call call = mOkHttpClient.newCall(request);
-            call.enqueue(new Callback() {
+
+            call.enqueue(new Callback()
+            {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(Call call, IOException e)
+                {
                     errorCallBack("上传失败", callBack);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
+                public void onResponse(Call call, Response response) throws IOException
+                {
+                    if (response.isSuccessful())
+                    {
                         finshCallBack(file, callBack);
-                    } else {
+                    } else
+                    {
                         errorCallBack("上传失败", callBack);
 
                     }
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e)
+        {
             e.printStackTrace();
 
             errorCallBack("接口访问失败", callBack);
@@ -281,13 +339,17 @@ public class OkHttpImpl {
      * @param actionUrl 接口地址
      * @param paramsMap 请求参数
      */
-    private String requestGetBySyn(String actionUrl, HashMap<String, String> paramsMap) {
+    private String requestGetBySyn(String actionUrl, HashMap<String, String> paramsMap)
+    {
         StringBuilder tempParams = new StringBuilder();
-        try {
+        try
+        {
             //处理参数
             int pos = 0;
-            for (String key : paramsMap.keySet()) {
-                if (pos > 0) {
+            for (String key : paramsMap.keySet())
+            {
+                if (pos > 0)
+                {
                     tempParams.append("&");
                 }
                 //对参数进行URLEncoder
@@ -302,12 +364,14 @@ public class OkHttpImpl {
             final Call call = mOkHttpClient.newCall(request);
             //执行请求
             final Response response = call.execute();
-            if (response.isSuccessful()) {
+            if (response.isSuccessful())
+            {
                 return response.body().string();
 
             }
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             return null;
         }
@@ -321,8 +385,10 @@ public class OkHttpImpl {
      * @param actionUrl 接口地址
      * @param reqParams 请求参数
      */
-    private String requestPostBySyn(String actionUrl, String reqParams) {
-        try {
+    private String requestPostBySyn(String actionUrl, String reqParams)
+    {
+        try
+        {
             //创建一个请求实体对象 RequestBody
             RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, reqParams);
             //创建一个请求
@@ -332,11 +398,13 @@ public class OkHttpImpl {
             //执行请求
             Response response = call.execute();
             //请求执行成功
-            if (response.isSuccessful()) {
+            if (response.isSuccessful())
+            {
                 //获取返回数据 可以是String，bytes ,byteStream
                 return response.body().string();
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             return null;
         }
@@ -351,29 +419,37 @@ public class OkHttpImpl {
      * @param callBack  请求返回数据回调
      * @return
      */
-    private void requestPostByAsyn(String actionUrl, String params, final NetCallBack.ReqCallBack callBack) {
-        try {
+    private void requestPostByAsyn(String actionUrl, String params, final ReqCallBack callBack)
+    {
+        try
+        {
 
             RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, params);
             final Request request = addHeaders().url(actionUrl).post(body).build();
             final Call call = mOkHttpClient.newCall(request);
-            call.enqueue(new Callback() {
+            call.enqueue(new Callback()
+            {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    failedCallBack("访问失败", callBack);
+                public void onFailure(Call call, IOException e)
+                {
+                    failedCallBack("" + e.getMessage(), callBack);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
+                public void onResponse(Call call, Response response) throws IOException
+                {
+                    if (response.isSuccessful())
+                    {
                         resSucHandle(response, callBack);
-                    } else {
+                    } else
+                    {
                         failedCallBack("服务器错误", callBack);
                     }
                 }
             });
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             failedCallBack("接口请求异常", callBack);
 
@@ -393,13 +469,16 @@ public class OkHttpImpl {
      * @param callBack  请求返回数据回调
      * @return
      */
-    private void requestGetByAsyn(String actionUrl, HashMap<String, String> paramsMap, final NetCallBack.ReqCallBack
-            callBack) {
+    private void requestGetByAsyn(String actionUrl, HashMap<String, String> paramsMap, final ReqCallBack callBack)
+    {
         StringBuilder tempParams = new StringBuilder();
-        try {
+        try
+        {
             int pos = 0;
-            for (String key : paramsMap.keySet()) {
-                if (pos > 0) {
+            for (String key : paramsMap.keySet())
+            {
+                if (pos > 0)
+                {
                     tempParams.append("&");
                 }
                 tempParams.append(String.format("%s=%s", key, URLEncoder.encode(paramsMap.get(key), "utf-8")));
@@ -408,23 +487,29 @@ public class OkHttpImpl {
             String requestUrl = String.format("%s?%s", actionUrl, tempParams.toString());
             final Request request = addHeaders().url(requestUrl).build();
             final Call call = mOkHttpClient.newCall(request);
-            call.enqueue(new Callback() {
+            call.enqueue(new Callback()
+            {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(Call call, IOException e)
+                {
                     failedCallBack("访问失败", callBack);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
+                public void onResponse(Call call, Response response) throws IOException
+                {
+                    if (response.isSuccessful())
+                    {
                         resSucHandle(response, callBack);
-                    } else {
+                    } else
+                    {
                         failedCallBack("服务器错误", callBack);
                     }
                 }
             });
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             failedCallBack("接口访问失败", callBack);
 
@@ -432,10 +517,12 @@ public class OkHttpImpl {
 
     }
 
-    private void resSucHandle(Response response, NetCallBack.ReqCallBack callBack) throws IOException {
+    private void resSucHandle(Response response, ReqCallBack callBack) throws IOException
+    {
         String result = null;
         ResponseBody responseBody = response.body();
-        if (responseBody != null) {
+        if (responseBody != null)
+        {
             result = responseBody.string();
         }
         successCallBack(result, callBack);
@@ -451,37 +538,61 @@ public class OkHttpImpl {
      * @param <T>
      * @return
      */
-    public <T> RequestBody createProgressRequestBody(final MediaType contentType, final File file, final
-    NetCallBack.FileStateCallBack callBack) {
-        return new RequestBody() {
+    public <T> RequestBody createProgressRequestBody(HashMap<String, String> map, final MediaType contentType, final File file, final FileStateCallBack callBack)
+    {
+
+        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+        if (map != null)
+        {
+            // map 里面是请求中所需要的 key 和 value
+            for (Map.Entry entry : map.entrySet())
+            {
+                builder.addFormDataPart(valueOf(entry.getKey()), valueOf(entry.getValue()));
+            }
+        }
+
+        // MediaType.parse() 里面是上传的文件类型。
+        // 参数分别为， 请求key ，文件名称 ， RequestBody
+        builder.addFormDataPart("fileName", file.getName(), new RequestBody()
+        {
             @Override
-            public MediaType contentType() {
+            public MediaType contentType()
+            {
                 return contentType;
             }
 
             @Override
-            public long contentLength() {
+            public long contentLength()
+            {
                 return file.length();
             }
 
             @Override
-            public void writeTo(BufferedSink sink) throws IOException {
+            public void writeTo(BufferedSink sink)
+            {
                 Source source;
-                try {
+                try
+                {
                     source = Okio.source(file);
                     Buffer buf = new Buffer();
                     long remaining = contentLength();
                     long current = 0;
-                    for (long readCount; (readCount = source.read(buf, 2048)) != -1; ) {
+                    for (long readCount; (readCount = source.read(buf, 2048)) != -1; )
+                    {
                         sink.write(buf, readCount);
                         current += readCount;
                         progressCallBack(remaining, current, callBack);
                     }
-                } catch (Exception e) {
+                } catch (Exception e)
+                {
                     e.printStackTrace();
                 }
             }
-        };
+        });
+
+
+        return builder.build();
     }
 
 
@@ -491,19 +602,19 @@ public class OkHttpImpl {
      * @param result
      * @param callBack
      */
-    private void successCallBack(final String result, final NetCallBack.ReqCallBack callBack) {
-//        okHttpHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (callBack != null) {
-//                    callBack.onReqSuccess(result);
-//                }
-//            }
-//        });
-
-        if (callBack != null) {
-            callBack.onReqSuccess(result);
-        }
+    private void successCallBack(final String result, final ReqCallBack callBack)
+    {
+        okHttpHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (callBack != null)
+                {
+                    callBack.onReqSuccess(result);
+                }
+            }
+        });
     }
 
     /**
@@ -512,62 +623,68 @@ public class OkHttpImpl {
      * @param errorMsg
      * @param callBack
      */
-    private void failedCallBack(final String errorMsg, final NetCallBack.ReqCallBack callBack) {
-//        okHttpHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (callBack != null) {
-//                    callBack.onReqFailed(errorMsg);
-//                }
-//            }
-//        });
-        if (callBack != null) {
-            callBack.onReqFailed(errorMsg);
-        }
-
+    private void failedCallBack(final String errorMsg, final NetCallBack.ReqCallBack callBack)
+    {
+        okHttpHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (callBack != null)
+                {
+                    callBack.onReqFailed(errorMsg);
+                }
+            }
+        });
     }
 
 
-    private void finshCallBack(final File file, final NetCallBack.FileStateCallBack FileStateCallBack) {
-//        // 下载失败
-//        okHttpHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (FileStateCallBack != null) {
-//                    FileStateCallBack.onFinish(file);
-//                }
-//            }
-//        });
-
-        if (FileStateCallBack != null) {
-            FileStateCallBack.onFinish(file);
-        }
-
-    }
-
-    private void progressCallBack(final long fileLenth, final long current, final NetCallBack.FileStateCallBack
-            FileStateCallBack) {
+    private void finshCallBack(final File file, final NetCallBack.FileStateCallBack FileStateCallBack)
+    {
         // 下载失败
-//        okHttpHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (FileStateCallBack != null) {
-//                    FileStateCallBack.onProgress(fileLenth, current);
-//                }
-//            }
-//        });
-        if (FileStateCallBack != null) {
-            FileStateCallBack.onProgress(fileLenth, current);
-        }
+        okHttpHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (FileStateCallBack != null)
+                {
+                    FileStateCallBack.onFinish(file);
+                }
+            }
+        });
+    }
+
+    private void progressCallBack(final long fileLenth, final long current, final NetCallBack.FileStateCallBack FileStateCallBack)
+    {
+        // 下载失败
+        okHttpHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (FileStateCallBack != null)
+                {
+                    FileStateCallBack.onProgress(fileLenth, current);
+                }
+            }
+        });
     }
 
 
-    private void errorCallBack(final String msg, final NetCallBack.FileStateCallBack FileStateCallBack) {
+    private void errorCallBack(final String msg, final NetCallBack.FileStateCallBack FileStateCallBack)
+    {
         // 下载失败
-
-
-        if (FileStateCallBack != null) {
-            FileStateCallBack.onError(msg);
-        }
+        okHttpHandler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (FileStateCallBack != null)
+                {
+                    FileStateCallBack.onError(msg);
+                }
+            }
+        });
     }
 }
