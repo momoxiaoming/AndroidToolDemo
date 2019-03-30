@@ -314,7 +314,7 @@ public class OkHttpImpl
                         finshCallBack(file, callBack);
                     } else
                     {
-                        errorCallBack("上传失败", callBack);
+                        errorCallBack("响应错误", callBack);
 
                     }
                 }
@@ -432,7 +432,7 @@ public class OkHttpImpl
                 @Override
                 public void onFailure(Call call, IOException e)
                 {
-                    failedCallBack("" + e.getMessage(), callBack);
+                    failedCallBack("访问失败" + e.getMessage(), callBack);
                 }
 
                 @Override
@@ -443,7 +443,7 @@ public class OkHttpImpl
                         resSucHandle(response, callBack);
                     } else
                     {
-                        failedCallBack("服务器错误", callBack);
+                        failedCallBack("响应错误", callBack);
                     }
                 }
             });
@@ -503,7 +503,7 @@ public class OkHttpImpl
                         resSucHandle(response, callBack);
                     } else
                     {
-                        failedCallBack("服务器错误", callBack);
+                        failedCallBack("响应错误", callBack);
                     }
                 }
             });
@@ -632,7 +632,7 @@ public class OkHttpImpl
             {
                 if (callBack != null)
                 {
-                    callBack.onReqFailed(errorMsg);
+                    callBack.onReqFailed(errorMsg==null?"":errorMsg);
                 }
             }
         });
@@ -682,7 +682,7 @@ public class OkHttpImpl
             {
                 if (FileStateCallBack != null)
                 {
-                    FileStateCallBack.onError(msg);
+                    FileStateCallBack.onError(msg==null?"":msg);
                 }
             }
         });
