@@ -6,42 +6,62 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
-public final class GsonUtil 
+public final class GsonUtil
 {
-    public static  <T> T parseJsonWithGson(String jsonData, Class<T> type) throws Exception
+    public static <T> T parseJsonWithGson(String jsonData, Class<T> type)
     {
         T rlt = null;
-        
-        if(!TextUtils.isEmpty(jsonData) && null != type)
+        try
         {
-            Gson gson = new Gson();
-            rlt = gson.fromJson(jsonData, type);
+            if (!TextUtils.isEmpty(jsonData) && null != type)
+            {
+                Gson gson = new Gson();
+                rlt = gson.fromJson(jsonData, type);
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
         }
-        
         return rlt;
+
     }
 
-    public static JSONObject toJsonWithGson(Object src) throws  Exception
+    public static JSONObject toJsonWithGson(Object src) throws Exception
     {
-        JSONObject rlt  = null;
-        if(null != src)
+        JSONObject rlt = null;
+
+        try
         {
-            String JsonString = toJsonStringWithGson(src);
-            rlt = new JSONObject(JsonString);
+            if (null != src)
+            {
+                String JsonString = toJsonStringWithGson(src);
+                rlt = new JSONObject(JsonString);
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
         return rlt;
     }
-    
-    public static  String toJsonStringWithGson(Object src) throws  Exception
+
+    public static String toJsonStringWithGson(Object src)
     {
         String rlt = null;
-
-        if(null != src)
+        try
         {
-            Gson gson = new Gson();
-            rlt = gson.toJson(src);
+            if (null != src)
+            {
+                Gson gson = new Gson();
+                rlt = gson.toJson(src);
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
         }
+
 
         return rlt;
     }
