@@ -307,14 +307,14 @@ public class OkHttpImpl
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException
+                public void onResponse(Call call, Response response)
                 {
                     if (response.isSuccessful())
                     {
                         finshCallBack(file, callBack);
                     } else
                     {
-                        errorCallBack("响应错误", callBack);
+                        errorCallBack("响应错误,状态码:"+response.code(), callBack);
 
                     }
                 }
@@ -443,7 +443,7 @@ public class OkHttpImpl
                         resSucHandle(response, callBack);
                     } else
                     {
-                        failedCallBack("响应错误", callBack);
+                        failedCallBack("响应错误,状态码:"+response.code(), callBack);
                     }
                 }
             });
