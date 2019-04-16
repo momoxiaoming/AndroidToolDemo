@@ -2,7 +2,7 @@ package com.andr.common.tool.cmd;
 
 import com.andr.common.tool.file.FileUtils;
 import com.andr.common.tool.log.LoggerUtil;
-import com.andr.common.tool.phone.PhoneUtil;
+import com.andr.common.tool.phone.PhoneUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public  class AdbUtils
             return false;
         }
         String cmd = "am start " + pakeName + "/" + activity;
-        if (!PhoneUtil.getInstance().isRoot()) {
+        if (!isRoot()) {
             LoggerUtil.e("手机没有root!!");
             return false;
         }
@@ -91,7 +91,7 @@ public  class AdbUtils
 
     private static boolean installApkForData(String filePath) {
         String cmd = "pm install -r " + filePath;
-        if (!PhoneUtil.getInstance().isRoot()) {
+        if (!isRoot()) {
             LoggerUtil.e("手机没有root!!");
             return false;
         }
@@ -110,7 +110,7 @@ public  class AdbUtils
 
     private static boolean installApkForDataAndStart(String filePath, String pakeName, String className) {
         String cmd = "pm install -r " + filePath + ";am start " + pakeName + "/" + className;
-        if (!PhoneUtil.getInstance().isRoot()) {
+        if (!isRoot()) {
             LoggerUtil.e("手机没有root!!");
             return false;
         }
@@ -125,7 +125,7 @@ public  class AdbUtils
     private static boolean installApkForSys(String filePath) {
         //判断版本
         String install_path = "";
-        if (PhoneUtil.getInstance().getSysSdkVer() >= 19) {//4.4
+        if (PhoneUtils.getSysSdkVer() >= 19) {//4.4
             install_path = "/system/priv-app/";
         } else {
             install_path = "/system/app/";
@@ -158,7 +158,7 @@ public  class AdbUtils
 
 
         //判断系统sdk是否大于21, 大于则需要重启
-        if (PhoneUtil.getInstance().getSysSdkVer() >= 21) {
+        if (PhoneUtils.getSysSdkVer() >= 21) {
             CmdUtils.execRootCmdSilent("reboot");
         }
 
@@ -186,7 +186,7 @@ public  class AdbUtils
      */
     public static boolean unInstallApk(String pakeName) {
         String cmd = "pm uninstall " + pakeName;
-        if (!PhoneUtil.getInstance().isRoot()) {
+        if (!isRoot()) {
             LoggerUtil.e("手机没有root!!");
             return false;
         }
@@ -197,6 +197,21 @@ public  class AdbUtils
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * 是否root
+     * @return
+     */
+    public static boolean isRoot() {
+        int ret = CmdUtils.execRootCmdSilent("echo test"); // 通过执行测试命令来检测
+        if (ret != -1) {
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }
 
