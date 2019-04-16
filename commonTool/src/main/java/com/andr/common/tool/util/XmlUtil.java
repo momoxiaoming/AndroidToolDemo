@@ -2,8 +2,6 @@ package com.andr.common.tool.util;
 
 import android.util.Xml;
 
-import com.andr.common.tool.file.FileUtil;
-
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.FileInputStream;
