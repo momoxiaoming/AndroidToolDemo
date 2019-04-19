@@ -32,4 +32,6 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
     implementation 'com.orhanobut:logger:2.2.0'
+    api 'org.greenrobot:greendao:3.2.2'
+
 }
