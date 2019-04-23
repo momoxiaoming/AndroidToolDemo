@@ -1,6 +1,6 @@
 package com.andr.entity.base;
 
-import com.andr.common.tool.util.ReflectUtil;
+import com.andr.common.tool.util.ReflectUtils;
 
 /**
  * <pre>
@@ -24,7 +24,7 @@ public class BaseData
         {
             for (String item : filedNm)
             {
-                Object obj = ReflectUtil.getFieldValue(this, this.getClass().getName(), item);
+                Object obj = ReflectUtils.getFieldValue(this, item);
 
                 if (obj == null)
                 {

@@ -1,5 +1,6 @@
 package com.andr.common.tool.util;
 
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * 反射调用工具类
  */
-public class ReflectUtil
+public class ReflectUtils
 {
     /**
      * 创建类对象
@@ -24,7 +25,7 @@ public class ReflectUtil
         Object rlt = null;
         try
         {
-            Class<?> cls = ReflectUtil.getCls(className);
+            Class<?> cls = getCls(className);
             if (cls != null)
             {
                 Constructor<?> cons = cls.getDeclaredConstructor(params);
@@ -80,13 +81,28 @@ public class ReflectUtil
      */
     public static Object invokeStaticMethod(Class<?> cls, String methodName, Class<?>[] parameterTypes, Object... args)
     {
-        if (cls == null)
+        Object rlt = null;
+        try
         {
-            return null;
+            Method method = getMethods(cls, methodName, parameterTypes);
+
+
+            if (method != null)
+            {
+                rlt = method.invoke(null, args);
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
         }
-        return invokeMethod(null, cls.getName(), methodName, parameterTypes, args);
+
+        return rlt;
 
     }
+
+
+
 
 
     /**
@@ -98,31 +114,14 @@ public class ReflectUtil
      * @param args           注入的参数
      * @return 返回结果, 可以null
      */
-    public static Object invokeMethod(Object obj, String methodName, Class<?>[] parameterTypes, Object... args)
+    public static Object invokeMethod(Object obj,String methodName, Class<?>[] parameterTypes, Object... args)
     {
-        return invokeMethod(obj, obj.getClass().getName(), methodName, parameterTypes, args);
-    }
-
-
-    /**
-     * 反射获取方法值,会从父类中查找
-     *
-     * @param obj            反射对象
-     * @param clsName        反射类名
-     * @param methodName     反射方法名
-     * @param parameterTypes 方法参数
-     * @param args           注入的参数
-     * @return 返回结果, 可以null
-     */
-    public static Object invokeMethod(Object obj, String clsName, String methodName, Class<?>[] parameterTypes, Object... args)
-    {
-
 
         Object rlt = null;
         try
         {
-            Class<?> cls = getCls(clsName);
-            Method method = getMethods(cls, methodName, parameterTypes);
+            Method method = getMethods(obj.getClass(), methodName, parameterTypes);
+
 
             if (method != null)
             {
@@ -141,16 +140,14 @@ public class ReflectUtil
      * 为反射类变量赋值,包含父类
      *
      * @param obj       反射对象
-     * @param clsName   类名
      * @param filedName 变量名
      * @param value     变量值
      */
-    public static void setFieldValue(Object obj, String clsName, String filedName, Object value)
+    public static void setFieldValue(Object obj, String filedName, Object value)
     {
         try
         {
-            Class<?> cls = getCls(clsName);
-            List<Field> fieldList = getFields(cls);
+            List<Field> fieldList = getFields(obj.getClass());
 
             if (fieldList != null)
             {
@@ -178,23 +175,21 @@ public class ReflectUtil
      */
     public static Object getStaticFieldValue(String clsName, String filedName)
     {
-        return getFieldValue(null, clsName, filedName);
+        return getFieldValue(null, filedName);
     }
 
     /**
      * 获取反射对象的变量值,包含父类的变量
-     *
-     * @param obj       对象
-     * @param clsName   类名
-     * @param filedName 变量名
-     * @return 变量值, 不存在时为空
+     * @param obj
+     * @param filedName
+     * @return
      */
-    public static Object getFieldValue(Object obj, String clsName, String filedName)
+    public static Object getFieldValue(Object obj, String filedName)
     {
+
         try
         {
-            Class<?> cls = getCls(clsName);
-            List<Field> fieldList = getFields(cls);
+            List<Field> fieldList = getFields(obj.getClass());
 
             if (fieldList != null)
             {
@@ -212,6 +207,41 @@ public class ReflectUtil
         {
             e.printStackTrace();
             return null;
+        }
+
+        return null;
+    }
+
+
+    /**
+     * 获取所有的变量名和变量值
+     * @param obj
+     * @return
+     */
+    public static List<String> getAllFieldValue(Object obj)
+    {
+
+
+        try
+        {
+            List<String> rltList = new ArrayList<>();
+            List<Field> fieldList = getFields(obj.getClass());
+            if (fieldList != null)
+            {
+                for (Field item : fieldList)
+                {
+
+                    Object rlt = item.get(obj);
+                    rltList.add(item.getName() + ":" + rlt);
+                }
+
+
+            }
+
+            return rltList;
+        } catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
         }
 
         return null;
