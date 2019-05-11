@@ -212,6 +212,53 @@ public class ReflectUtils
         return null;
     }
 
+    /**
+     * 获取反射对象的变量值,处理了变量名相同的情况
+     *
+     * @param obj
+     * @param filedName
+     * @return
+     */
+    public static Object getFieldValueForFiledClsNm(Object obj, String filedName, String filedClsNm)
+    {
+
+
+        List<Object> mList = new ArrayList<>();
+        try
+        {
+            List<Field> fieldList = ReflectUtils.getFields(obj.getClass());
+
+            if (fieldList != null)
+            {
+                for (Field item : fieldList)
+                {
+                    if (item.getName().equals(filedName))
+                    {
+                        if(item.get(obj)!=null){
+                            mList.add(item.get(obj));
+                        }
+
+                    }
+                }
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        for (Object itemObj : mList)
+        {
+
+            if (itemObj.getClass().getName().equals(filedClsNm))
+            {
+                return itemObj;
+            }
+        }
+
+        return null;
+
+    }
 
     /**
      * 获取所有的变量名和变量值
