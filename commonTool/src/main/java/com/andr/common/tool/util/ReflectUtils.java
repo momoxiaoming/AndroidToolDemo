@@ -58,18 +58,7 @@ public class ReflectUtils
         }
     }
 
-    /**
-     * 反射获取静态方法值,会从父类中查找
-     *
-     * @param methodName     反射方法名
-     * @param parameterTypes 方法参数
-     * @param args           注入的参数
-     * @return 返回结果, 可以null
-     */
-    public static Object invokeStaticMethod(String className, String methodName, Class<?>[] parameterTypes, Object... args)
-    {
-        return invokeStaticMethod(getCls(className), methodName, parameterTypes, args);
-    }
+
 
     /**
      * 反射获取静态方法值,会从父类中查找
@@ -173,9 +162,29 @@ public class ReflectUtils
      * @param filedName 变量名
      * @return 变量值, 不存在时为空
      */
-    public static Object getStaticFieldValue(String clsName, String filedName)
+    public static Object getStaticFieldValue(String clsName,ClassLoader classLoader, String filedName)
     {
-        return getFieldValue(null, filedName);
+        try
+        {
+            Class<?> cls = classLoader.loadClass(clsName);
+            List<Field> mlist = getFields(cls);
+            if (mlist != null)
+            {
+                for (Field item : mlist)
+                {
+                    if (item.getName().equals(filedName))
+                    {
+                        return item.get(null);
+                    }
+
+                }
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
