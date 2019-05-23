@@ -154,7 +154,35 @@ public class ReflectUtils
             e.printStackTrace();
         }
     }
+    /**
+     * 为反射类变量赋值,包含父类
+     *
+     * @param
+     * @param filedName 变量名
+     * @param value     变量值
+     */
+    public static void setStaticFieldValue(Class<?> cls, String filedName, Object value)
+    {
+        try
+        {
+            List<Field> fieldList = getFields(cls);
 
+            if (fieldList != null)
+            {
+                for (Field item : fieldList)
+                {
+                    if (item.getName().equals(filedName))
+                    {
+                        item.set(null, value);
+                    }
+                }
+
+            }
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
     /**
      * 反射静态变量的值,包含父类
      *
