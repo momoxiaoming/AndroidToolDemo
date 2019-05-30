@@ -94,7 +94,7 @@ public class HttpRequestCall
             @Override
             public void onFailure(Call call, IOException e)
             {
-                sendFailure(id, call, e, e.toString(), callBack);
+                sendFailure(id,  e, e.toString(), callBack);
             }
 
             @Override
@@ -104,23 +104,23 @@ public class HttpRequestCall
                 {
                     if (call.isCanceled())
                     {
-                        sendFailure(id, call, new IOException("request is canceled"), "请求已取消", callBack);
+                        sendFailure(id,  new IOException("request is canceled"), "请求已取消", callBack);
                     } else if (response.isSuccessful())
                     {
                         sendSucess(id, callBack.onParse(response, id), callBack);
                     } else if (response.body() == null)
                     {
-                        sendFailure(id, call, new IOException("request failed ,response code is " + response.code()), "", callBack);
+                        sendFailure(id,  new IOException("request failed ,response code is " + response.code()), "", callBack);
 
                     } else
                     {
-                        sendFailure(id, call, new IOException("request failed ,response code is " + response.code()), new String(response.body().bytes()), callBack);
+                        sendFailure(id,  new IOException("request failed ,response code is " + response.code()), new String(response.body().bytes()), callBack);
 
                     }
                 } catch (Exception e)
                 {
                     e.printStackTrace();
-                    sendFailure(id, call, e, e.toString(), callBack);
+                    sendFailure(id,  e, e.toString(), callBack);
 
                 }finally
                 {
@@ -149,7 +149,7 @@ public class HttpRequestCall
     /**
      * 回到到主线程
      */
-    public  void sendFailure(final int id, final Call call, final Exception exep, final String errmsg, final Callback callback)
+    public  void sendFailure(final int id,  final Exception exep, final String errmsg, final Callback callback)
     {
 
         if (isOnMainThread)
@@ -160,12 +160,12 @@ public class HttpRequestCall
                 @Override
                 public void run()
                 {
-                    callback.onFailure(id, call, exep, errmsg);
+                    callback.onFailure(id,  exep, errmsg);
                 }
             });
         } else
         {
-            callback.onFailure(id, call, exep, errmsg);
+            callback.onFailure(id, exep, errmsg);
         }
 
     }

@@ -1,6 +1,5 @@
 package com.andr.common.tool.net.okhttpUtil.callback;
 
-import okhttp3.Call;
 import okhttp3.Response;
 
 /**
@@ -12,7 +11,7 @@ import okhttp3.Response;
  */
 public abstract class Callback
 {
-    public abstract void onFailure(int id, Call call, Exception exception, String errmsg);
+    public abstract void onFailure(int id,  Exception exception, String errmsg);
 
     public abstract Object onParse(Response response, int id) throws Exception;
 
