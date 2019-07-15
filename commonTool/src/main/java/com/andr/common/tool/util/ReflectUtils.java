@@ -12,6 +12,15 @@ import java.util.List;
  */
 public class ReflectUtils
 {
+
+    /**
+     * 打印调用堆栈
+     */
+    public static void logDump(){
+
+       Thread.dumpStack();
+
+    }
     /**
      * 创建类对象
      *
