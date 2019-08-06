@@ -2,6 +2,9 @@ package com.andr.entity.base;
 
 import com.andr.common.tool.util.ReflectUtils;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 /**
  * <pre>
  *     author: momoxiaoming
@@ -26,7 +29,7 @@ public class BaseData
             {
                 Object obj = ReflectUtils.getFieldValue(this, item);
 
-                if (obj == null)
+                if (obj == null || "".equals(obj))
                 {
                     return false;
                 }
@@ -37,5 +40,30 @@ public class BaseData
         return true;
     }
 
+    /**
+     * 判断所有参数是否为空
+     * @return
+     */
+    public boolean isAllParamReady()
+    {
+
+        List<Field> fields = ReflectUtils.getFields(this.getClass());
+        if (fields == null)
+        {
+            return true;
+        }
+        for (Field item : fields)
+        {
+            Object obj = ReflectUtils.getFieldValue(this, item.getName());
+
+            if (obj == null || "".equals(obj))
+            {
+                return false;
+            }
+        }
+
+
+        return true;
+    }
 
 }
