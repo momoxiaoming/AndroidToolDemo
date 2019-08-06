@@ -9,7 +9,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.andr.common.tool.encode.SecUtils;
 import com.andr.common.tool.encode.StrCharset;
@@ -302,7 +304,44 @@ public  class AppUtils
         }
         return "";
 
+    }
+
+    /**
+     * 判断是否打开了通知权限
+     *
+     * @param context
+     */
+
+    public static boolean isNotificationOpen(Context context)
+    {
+
+        boolean flg = false;
+
+        String notiStr = Settings.Secure.getString(context.getContentResolver(), "enabled_notification_listeners");
+
+        if (notiStr != null && !TextUtils.isEmpty(notiStr))
+        {
+            LoggerUtil.d("含有通知权限的应用:"+notiStr);
+            if(notiStr.contains(context.getPackageName())){
+                return true;
+            }
+        }
+        return flg;
 
     }
+
+    /**
+     * 打开通知权限
+     *
+     * @param context
+     */
+    public static void OpenNotificationReadPermission(Context context)
+    {
+        Toast.makeText(context, "请勾选通知权限", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+        intent.setFlags(intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
 
 }
