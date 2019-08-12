@@ -7,6 +7,8 @@ import com.andr.common.tool.net.okhttpUtil.OkHttpUtils;
 import com.andr.common.tool.net.okhttpUtil.callback.BeanCallback;
 import com.andr.common.tool.net.okhttpUtil.callback.Callback;
 
+import org.apache.http.conn.ConnectTimeoutException;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -117,6 +119,11 @@ public class HttpRequestCall
                         sendFailure(id,  new IOException("request failed ,response code is " + response.code()), new String(response.body().bytes()), callBack);
 
                     }
+                }catch (ConnectTimeoutException e)
+                {
+                    e.printStackTrace();
+                    sendFailure(id,  e, "请求超时", callBack);
+
                 } catch (Exception e)
                 {
                     e.printStackTrace();
