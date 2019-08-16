@@ -1,16 +1,23 @@
 package com.mmo.tooldemo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.andr.common.tool.log.LoggerUtil;
+import com.andr.common.tool.util.ReflectUtils;
 import com.mmo.tooldemo.room.AppDataBase;
 import com.mmo.tooldemo.room.entity.User;
 
+import org.qiyi.video.svg.Andromeda;
+import org.qiyi.video.svg.event.Event;
+import org.qiyi.video.svg.event.EventListener;
+
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements ICheckApple , EventListener
 {
 
     @Override
@@ -18,17 +25,27 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Andromeda.registerLocalService(ICheckApple.class,this);
 
+        Andromeda.subscribe("123",MainActivity.this);
 
         findViewById(R.id.test2).setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                User user = new User();
-                user.setAge("123");
-                user.setName("xiaoming");
-                AppDataBase.getInstance(getApplicationContext()).userDao().insertUser(user);
+//                User user = new User();
+//                user.setAge("123");
+//                user.setName("xiaoming");
+//                try
+//                {
+//                    AppDataBase.getInstance(getApplicationContext()).userDao().insertUser(user);
+//                } catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                }
+
+                startActivity(new Intent(MainActivity.this,Main2Activity.class));
 
             }
         });
@@ -41,7 +58,7 @@ public class MainActivity extends AppCompatActivity
                 //
                 List<User> list = AppDataBase.getInstance(getApplicationContext()).userDao().getUser();
 
-
+                ReflectUtils.logDump();
                 Log.d("allen","---"+list.size());
 //                downFile();
             }
@@ -77,4 +94,16 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onPostData()
+    {
+        LoggerUtil.i("onpostdat");
+    }
+
+    @Override
+    public void onNotify(Event event)
+    {
+        LoggerUtil.i("收到事件");
+
+    }
 }

@@ -5,8 +5,11 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
+import com.mmo.tooldemo.ICheckApple;
 import com.mmo.tooldemo.room.dao.UserDao;
 import com.mmo.tooldemo.room.entity.User;
+
+import org.qiyi.video.svg.Andromeda;
 
 /**
  * <pre>
@@ -32,6 +35,9 @@ public abstract class AppDataBase extends RoomDatabase
             if (INSTANCE == null)
             {
                 INSTANCE = Room.databaseBuilder(context, AppDataBase.class, "user.db").allowMainThreadQueries().build();
+
+                ICheckApple checkApple = Andromeda.getLocalService(ICheckApple.class);
+
             }
             return INSTANCE;
         }
