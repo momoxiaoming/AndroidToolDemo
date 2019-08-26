@@ -628,4 +628,23 @@ public class FileUtils
         }
         return false;
     }
+
+    /**
+     * 获取文件夹大小
+     * @param file
+     * @return
+     */
+    public static long getFolderSize(File file) {
+        long size = 0;
+        try {
+            File[] fileList = file.listFiles();
+            for (int i = 0; i < fileList.length; i++) {
+                if (fileList[i].isDirectory()) size = size + getFolderSize(fileList[i]);
+                else size = size + fileList[i].length();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return size;
+    }
 }
