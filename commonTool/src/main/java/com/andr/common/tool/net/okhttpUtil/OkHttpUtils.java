@@ -35,6 +35,8 @@ public class OkHttpUtils
             logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             okHttpClient = new OkHttpClient.Builder()
+//                    .addInterceptor(new RetryInterceptor())
+
                     //                    .addNetworkInterceptor(logInterceptor)   //打印请求的信息,缺点是会拖慢下载速度
                     .connectTimeout(defultTimeOut, TimeUnit.MILLISECONDS).readTimeout(defultTimeOut, TimeUnit.MILLISECONDS).writeTimeout(defultTimeOut, TimeUnit.MILLISECONDS).build();
         } else

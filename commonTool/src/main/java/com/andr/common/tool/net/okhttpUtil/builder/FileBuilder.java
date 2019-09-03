@@ -6,7 +6,6 @@ import com.andr.common.tool.net.okhttpUtil.request.HttpRequestCall;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <pre>
@@ -43,7 +42,6 @@ public class FileBuilder extends HttpRequestBuilder
 
 
 
-    protected Map<String,String> params;
 
     private List<OkFile> files;
 
