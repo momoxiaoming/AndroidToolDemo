@@ -1,6 +1,5 @@
 package com.mmo.tooldemo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +14,7 @@ import org.qiyi.video.svg.Andromeda;
 import org.qiyi.video.svg.event.Event;
 import org.qiyi.video.svg.event.EventListener;
 
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ICheckApple , EventListener
@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity implements ICheckApple , Eve
         Andromeda.registerLocalService(ICheckApple.class,this);
 
         Andromeda.subscribe("123",MainActivity.this);
-
         findViewById(R.id.test2).setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -45,7 +44,15 @@ public class MainActivity extends AppCompatActivity implements ICheckApple , Eve
 //                    e.printStackTrace();
 //                }
 
-                startActivity(new Intent(MainActivity.this,Main2Activity.class));
+//                startActivity(new Intent(MainActivity.this,Main2Activity.class));
+
+                LoggerUtil.e("12313123");
+
+                if(new File(getFilesDir()+ File.separator+"log/").isDirectory()){
+                    LoggerUtil.e("11111");
+                }else{
+                    LoggerUtil.e("33333");
+                }
 
             }
         });

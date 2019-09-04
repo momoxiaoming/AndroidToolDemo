@@ -6,6 +6,8 @@ import com.andr.common.tool.log.LoggerUtil;
 
 import org.qiyi.video.svg.Andromeda;
 
+import java.io.File;
+
 /**
  * <pre>
  *     author: momoxiaoming
@@ -20,6 +22,14 @@ public class TestApplication extends Application
     {
         super.onCreate();
         Andromeda.init(this);
-        LoggerUtil.initLogger("tag",true,true);
+        File file = new File(getFilesDir() + File.separator + "log");
+
+        if(!file.exists()||!file.isDirectory()){
+            file.mkdirs();
+        }
+
+        LoggerUtil.initLogger("tag", false, 3, getFilesDir() + File.separator + "log");
+
+        LoggerUtil.e("123123123");
     }
 }

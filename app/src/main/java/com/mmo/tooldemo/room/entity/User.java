@@ -19,7 +19,6 @@ public class User
     private int uid;
     @NonNull
     private String name;
-
     private String age;
 
     public int getUid()

@@ -43,4 +43,9 @@ dependencies {
 
     implementation "org.qiyi.video.svg:core:1.1.8"
 
+
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+
+
 }

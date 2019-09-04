@@ -20,6 +20,7 @@ public class LoggerUtil
     private static boolean IS_CACHE = false;     //true表示缓存日志到文件
     private static boolean IS_LOGGABLE = false;     //true表示输出Log
     private static int logLv = 0;
+    private static String logFilePath="";
 
     /**
      * 日志系统初始化
@@ -27,13 +28,15 @@ public class LoggerUtil
      * @param Tag     打印的Tag
      * @param openLog 是否打开log
      * @param logLeve 要保存的日志等级信息,3是d,4是i,5是w,6是e
+     * @param logPath 日志保存的路径,默认是/sdcard/logger
      */
-    public static void initLogger(String Tag, boolean openLog, int logLeve)
+    public static void initLogger(String Tag, boolean openLog, int logLeve,String logPath)
     {
 
         TAG_NAME = Tag;
         IS_LOGGABLE = openLog;
         logLv = logLeve;
+        logFilePath=logPath;
 
         init();
     }
@@ -51,6 +54,7 @@ public class LoggerUtil
                     .dateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))  // 设置保存的格式化时间,默认 yyyy.MM.dd HH:mm:ss.SSS
                     //                    .logStrategy()  // 更改日志策略以打印出。默认的logcat
                     .tag(TAG_NAME)  // 自定义日志标记
+                    .logFilePath(logFilePath)
                     .build();
             Logger.addLogAdapter(new DiskLogAdapter(formatStrategy)
             {
