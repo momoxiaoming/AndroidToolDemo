@@ -20,8 +20,12 @@ public class Main2Activity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
+
+
                 ICheckApple iCheckApple = Andromeda.getLocalService(ICheckApple.class);
                 iCheckApple.onPostData();
+
+
                 Event evet=new Event();
                 evet.setName("123");
                 Andromeda.publish(evet);
