@@ -1,11 +1,16 @@
 package com.andr.common.tool.phone;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
@@ -28,7 +33,7 @@ import java.util.List;
  * Created by zhangxiaoming on 2018/9/18.
  */
 
-public  class PhoneUtils
+public class PhoneUtils
 {
 
     private static final String TEL_MANAGER = "android.telephony.TelephonyManager";
@@ -39,7 +44,8 @@ public  class PhoneUtils
      * 获取android id
      */
     @SuppressLint("HardwareIds")
-    public static String getAndId(Context context) {
+    public static String getAndId(Context context)
+    {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
@@ -47,12 +53,15 @@ public  class PhoneUtils
      * 获取Imei
      */
     @SuppressLint({"MissingPermission", "HardwareIds"})
-    public static String getImei(Context context) {
+    public static String getImei(Context context)
+    {
         String imei = null;
 
-        if (PermissionsUtil.hasPermissions(context, new String[]{"android.permission.READ_PHONE_STATE"})) {
+        if (PermissionsUtil.hasPermissions(context, new String[]{"android.permission.READ_PHONE_STATE"}))
+        {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (tm != null) {
+            if (tm != null)
+            {
                 imei = tm.getDeviceId();
             }
         }
@@ -63,10 +72,12 @@ public  class PhoneUtils
      * 获取imsi
      */
     @SuppressLint({"MissingPermission", "HardwareIds"})
-    public static String getImsi(Context context) {
+    public static String getImsi(Context context)
+    {
         String imsi = null;
 
-        if (PermissionsUtil.hasPermissions(context, new String[]{"android.permission.READ_PHONE_STATE"})) {
+        if (PermissionsUtil.hasPermissions(context, new String[]{"android.permission.READ_PHONE_STATE"}))
+        {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
             if (tm != null)// && isSimReady(context))
@@ -80,17 +91,20 @@ public  class PhoneUtils
     /**
      * 获取机型
      */
-    public static String getMode() {
+    public static String getMode()
+    {
         return StringUtil.setStringIfEmpty(Build.MODEL);
     }
 
 
-    public static String getBrand() {
+    public static String getBrand()
+    {
         return StringUtil.setStringIfEmpty(Build.BRAND);
     }
 
 
-    public static String getGsmVersionRilImpl() {
+    public static String getGsmVersionRilImpl()
+    {
         return getSystemPropertie("gsm.version.ril-impl");
     }
 
@@ -98,21 +112,24 @@ public  class PhoneUtils
     /**
      * 获取系统配置文件
      */
-    public static String getSystemPropertie(String propertie) {
+    public static String getSystemPropertie(String propertie)
+    {
         String value = "unknown";
 
         value = System.getProperty(propertie);
-        if (null == value) {
+        if (null == value)
+        {
 
-            try {
+            try
+            {
                 Class<?> classType = Class.forName("android.os.SystemProperties");
                 Method getMethod = classType.getDeclaredMethod("get", new Class<?>[]{String.class});
 
                 value = (String) getMethod.invoke(classType, new Object[]{propertie});
 
 
-
-            } catch (Exception exp) {
+            } catch (Exception exp)
+            {
             }
         }
 
@@ -122,7 +139,8 @@ public  class PhoneUtils
     /**
      * 获取硬件名称
      */
-    public static String getHardwareName() {
+    public static String getHardwareName()
+    {
         return StringUtil.setStringIfEmpty(getSystemPropertie("ro.hardware"));
     }
 
@@ -130,7 +148,8 @@ public  class PhoneUtils
     /**
      * 获取系统版本
      */
-    public static int getSysSdkVer() {
+    public static int getSysSdkVer()
+    {
         return Build.VERSION.SDK_INT;
     }
 
@@ -138,11 +157,14 @@ public  class PhoneUtils
     /**
      * 获取手机分辨率
      */
-    public static String getScreenSize(Context context) {
-        if (null != context) {
+    public static String getScreenSize(Context context)
+    {
+        if (null != context)
+        {
             WindowManager wndManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             Display display = wndManager.getDefaultDisplay();
-            if (null != display) {
+            if (null != display)
+            {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 display.getMetrics(displayMetrics);
                 return displayMetrics.widthPixels + "_" + displayMetrics.heightPixels;
@@ -152,17 +174,18 @@ public  class PhoneUtils
     }
 
 
-
-    public static String getDevicesSerialNumber() {
+    public static String getDevicesSerialNumber()
+    {
         return getSystemPropertie("ro.serialno");
     }
 
 
-
-    public static String getNetWorkOperator(Context context) {
+    public static String getNetWorkOperator(Context context)
+    {
         String rlt = null;
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (null != tm) {
+        if (null != tm)
+        {
             rlt = tm.getNetworkOperator();
         }
         return StringUtil.setStringIfEmpty(rlt);
@@ -172,12 +195,15 @@ public  class PhoneUtils
      * 获取iccId
      */
     @SuppressLint({"MissingPermission", "HardwareIds"})
-    public static String getIccid(Context context) {
+    public static String getIccid(Context context)
+    {
         String rlt = null;
 
-        if (PermissionsUtil.hasPermissions(context, new String[]{"android.permission.READ_PHONE_STATE"})) {
+        if (PermissionsUtil.hasPermissions(context, new String[]{"android.permission.READ_PHONE_STATE"}))
+        {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (tm != null) {
+            if (tm != null)
+            {
                 rlt = tm.getSimSerialNumber();
             }
         }
@@ -187,9 +213,11 @@ public  class PhoneUtils
     /**
      * 是否是联发科cpu
      */
-    public static boolean isMtkPlatform(Context context) {
+    public static boolean isMtkPlatform(Context context)
+    {
         boolean ret = false;
-        try {
+        try
+        {
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             Class<?> mLoadClass = Class.forName(TEL_MANAGER);
             Class<?>[] parameter = new Class[1];
@@ -200,20 +228,19 @@ public  class PhoneUtils
             obParameter[0] = 0;
             getImei.invoke(telephonyManager, obParameter);
             ret = true;
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             ret = false;
         }
         return ret;
     }
 
 
-
-
-
     /**
      * 获取内置sd卡大小
      */
-    public static String getSDTotalSize(Context context) {
+    public static String getSDTotalSize(Context context)
+    {
         File path = Environment.getExternalStorageDirectory();
         StatFs stat = new StatFs(path.getPath());
         long blockSize = stat.getBlockSize();
@@ -224,7 +251,8 @@ public  class PhoneUtils
     /**
      * 获取外置sd卡大小
      */
-    public static long getSDAvailableSize(Context context) {
+    public static long getSDAvailableSize(Context context)
+    {
         File path = Environment.getExternalStorageDirectory();
         StatFs stat = new StatFs(path.getPath());
         long blockSize = stat.getBlockSize();
@@ -235,8 +263,9 @@ public  class PhoneUtils
     /**
      * 判断是否在桌面
      */
-    public static boolean isHome(Context context) {
-        if(null != context)
+    public static boolean isHome(Context context)
+    {
+        if (null != context)
         {
             List<String> packages = new ArrayList<String>();
             PackageManager packageManager = context.getPackageManager();
@@ -251,11 +280,71 @@ public  class PhoneUtils
             List<String> homes = packages;
             ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-            if(null != homes && homes.size() > 0 && null != rti && rti.size() > 0)
+            if (null != homes && homes.size() > 0 && null != rti && rti.size() > 0)
             {
                 return homes.contains(rti.get(0).topActivity.getPackageName());
             }
         }
         return false;
     }
+
+    /**
+     * 根据wifi信息获取本地mac
+     *
+     * @param context
+     * @return
+     */
+    public static String getLocalMacAddressFromWifiInfo(Context context)
+    {
+        WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo winfo = wifi.getConnectionInfo();
+        String mac = winfo.getMacAddress();
+        return mac;
+    }
+
+    /**
+     * 获取SSID
+     *
+     * @param
+     * @return WIFI 的SSID
+     */
+    public static String getWIFISSID(Context context)
+    {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
+        return wifiInfo.getSSID();
+    }
+
+    /**
+     * 获取ip地址
+     * @param context
+     * @return
+     */
+    public static String getIpAdress(Context context)
+    {
+
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        int ipAddress = wifiInfo.getIpAddress();
+        String ip = (ipAddress & 0xff) + "." + (ipAddress >> 8 & 0xff) + "." + (ipAddress >> 16 & 0xff) + "." + (ipAddress >> 24 & 0xff);
+        return ip;
+    }
+
+    /**
+     * 判断是否是wifi
+     * @param mContext
+     * @return
+     */
+    public static boolean isWifi(Context mContext) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetInfo = connectivityManager.getActiveNetworkInfo();
+        if (activeNetInfo != null
+                && activeNetInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+            return true;
+        }
+        return false;
+    }
+
 }
