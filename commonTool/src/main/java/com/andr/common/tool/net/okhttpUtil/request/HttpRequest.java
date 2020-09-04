@@ -1,7 +1,8 @@
 package com.andr.common.tool.net.okhttpUtil.request;
 
-import com.andr.common.tool.net.okhttpUtil.callback.Callback;
+
 import com.andr.common.tool.util.StringUtil;
+import com.andr.common.tool.net.okhttpUtil.callback.Callback;
 
 import java.util.HashMap;
 
@@ -75,6 +76,16 @@ public abstract class HttpRequest
     public int getId()
     {
         return id;
+    }
+
+    public String getTag()
+    {
+        return tag;
+    }
+
+    public void setTag(String tag)
+    {
+        this.tag = tag;
     }
 
     public abstract Request onRequest(RequestBody arg1);

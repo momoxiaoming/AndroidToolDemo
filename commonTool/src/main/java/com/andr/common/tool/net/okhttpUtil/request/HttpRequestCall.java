@@ -9,7 +9,9 @@ import com.andr.common.tool.net.okhttpUtil.callback.Callback;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -60,7 +62,7 @@ public class HttpRequestCall
         this.request = this.httpRequest.onRequest(this.httpRequest.onRequestBody(this.httpRequest.onRequestBody(), callBack));
         if (request == null)
         {
-            callBack.onFailure(1, new Exception("请求对象为空!"), "请求对象为空!");
+            callBack.onFailure(httpRequest.getTag(), new Exception("请求对象为空!"), "请求对象为空!");
             return;
         }
         if (this.conTimeOut > 0 || this.readTimeOut > 0 || this.writeTimeOut > 0)
@@ -97,6 +99,7 @@ public class HttpRequestCall
 
 
         final int id = httpRequest.getId();
+        final String tag = httpRequest.getTag();
 
         call.enqueue(new okhttp3.Callback()
         {
@@ -110,15 +113,19 @@ public class HttpRequestCall
                 } catch (SocketTimeoutException e1)
                 {
                     e1.printStackTrace();
-                    sendFailure(id, e, "服务器连接超时", callBack);
-                } catch (ConnectException e1)
+                    sendFailure(tag, e, "服务器连接超时", callBack);
+                } catch (ConnectException e2)
                 {
-                    e1.printStackTrace();
-                    sendFailure(id, e, "连接异常,请检查网络", callBack);
-                } catch (Exception e1)
+                    e2.printStackTrace();
+                    sendFailure(tag, e2, "连接异常,请检查网络", callBack);
+                }catch (UnknownHostException e3)
                 {
-                    e1.printStackTrace();
-                    sendFailure(id, e, e.toString(), callBack);
+                    e3.printStackTrace();
+                    sendFailure(tag, e3, "请求异常,请检查网络", callBack);
+                } catch (Exception e4)
+                {
+                    e4.printStackTrace();
+                    sendFailure(tag, e4, "请求异常,请检查网络", callBack);
                 }
 
             }
@@ -130,31 +137,35 @@ public class HttpRequestCall
                 {
                     if (call.isCanceled())
                     {
-                        sendFailure(id, new IOException("request is canceled"), "请求已取消", callBack);
+                        sendFailure(tag, new IOException("request is canceled"), "请求已取消", callBack);
                     } else if (response.isSuccessful())
                     {
-                        sendSucess(id, callBack.onParse(response, id), callBack);
+                        sendSucess(tag, callBack.onParse(response, tag), callBack);
                     } else if (response.body() == null)
                     {
-                        sendFailure(id, new IOException("request failed ,response code is " + response.code()), "无响应内容", callBack);
+                        sendFailure(tag, new IOException("request failed ,response code is " + response.code()), "无响应内容", callBack);
 
                     } else
                     {
-                        sendFailure(id, new IOException("request failed ,response code is " + response.code()), "请求失败,状态码 " + response.code(), callBack);
+                        sendFailure(tag, new IOException("request failed ,response code is " + response.code()), "请求失败,状态码 " + response.code(), callBack);
 
                     }
                 } catch (SocketTimeoutException e)
                 {
                     e.printStackTrace();
-                    sendFailure(id, e, "连接超时", callBack);
+                    sendFailure(tag, e, "连接超时", callBack);
                 } catch (ConnectException e)
                 {
                     e.printStackTrace();
-                    sendFailure(id, e, "连接异常", callBack);
-                } catch (Exception e)
+                    sendFailure(tag, e, "连接异常", callBack);
+                } catch (SocketException e)
                 {
                     e.printStackTrace();
-                    sendFailure(id, e, "请求异常", callBack);
+                    sendFailure(tag, e, "连接取消", callBack);
+                }  catch (Exception e)
+                {
+                    e.printStackTrace();
+                    sendFailure(tag, e, "请求异常", callBack);
 
                 } finally
                 {
@@ -183,7 +194,7 @@ public class HttpRequestCall
     /**
      * 回到到主线程
      */
-    public void sendFailure(final int id, final Exception exep, final String errmsg, final Callback callback)
+    public void sendFailure(final String tag, final Exception exep, final String errmsg, final Callback callback)
     {
 
         if (isOnMainThread)
@@ -194,12 +205,12 @@ public class HttpRequestCall
                 @Override
                 public void run()
                 {
-                    callback.onFailure(id, exep, errmsg);
+                    callback.onFailure(tag, exep, errmsg);
                 }
             });
         } else
         {
-            callback.onFailure(id, exep, errmsg);
+            callback.onFailure(tag, exep, errmsg);
         }
 
     }
@@ -207,7 +218,7 @@ public class HttpRequestCall
     /**
      * 回到到主线程
      */
-    public void sendSucess(final int id, final Object rlt, final Callback callBack)
+    public void sendSucess(final String tag, final Object rlt, final Callback callBack)
     {
         if (isOnMainThread)
         {
@@ -217,12 +228,12 @@ public class HttpRequestCall
                 @Override
                 public void run()
                 {
-                    callBack.onResponse(id, rlt);
+                    callBack.onResponse(tag, rlt);
                 }
             });
         } else
         {
-            callBack.onResponse(id, rlt);
+            callBack.onResponse(tag, rlt);
         }
 
     }

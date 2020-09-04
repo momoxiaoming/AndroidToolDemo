@@ -1,5 +1,6 @@
 package com.andr.common.tool.net.okhttpUtil.request;
 
+
 import com.andr.common.tool.net.okhttpUtil.builder.FileBuilder;
 import com.andr.common.tool.net.okhttpUtil.callback.Callback;
 
@@ -41,7 +42,7 @@ public class FileRequest extends HttpRequest
     public String getMediaType(String arg3)
     {
 
-//        return "application/octet-stream";
+//        toolbar_left_img "application/octet-stream";
         try
         {
             return URLConnection.getFileNameMap().getContentTypeFor(URLEncoder.encode(arg3, "UTF-8"));

@@ -12,7 +12,7 @@ public abstract class BitmapCallBack extends Callback
         super();
     }
 
-    public Bitmap onParse(Response response, int id)
+    public Bitmap onParse(Response response, String tag)
     {
         if (response.body() == null)
         {
@@ -25,9 +25,9 @@ public abstract class BitmapCallBack extends Callback
     public abstract void onResponse(int id, Bitmap bitmap);
 
     @Override
-    public void onResponse(int id, Object object)
+    public void onResponse(String tag, Object object)
     {
-        onResponse(id, (Bitmap) object);
+        onResponse(tag, (Bitmap) object);
     }
 }
 

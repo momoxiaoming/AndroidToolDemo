@@ -16,7 +16,7 @@ public abstract class BeanCallback extends Callback
     private Class clazz;
 
 
-    public Object onParse(Response response, int id) throws Exception
+    public Object onParse(Response response, String  tag) throws Exception
     {
         if (response.body() == null)
         {

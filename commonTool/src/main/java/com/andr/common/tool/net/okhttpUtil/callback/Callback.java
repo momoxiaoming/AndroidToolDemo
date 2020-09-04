@@ -11,11 +11,11 @@ import okhttp3.Response;
  */
 public abstract class Callback
 {
-    public abstract void onFailure(int id,  Exception exception, String errmsg);
+    public abstract void onFailure(String tag,  Exception exception, String errmsg);
 
-    public abstract Object onParse(Response response, int id) throws Exception;
+    public abstract Object onParse(Response response, String tag) throws Exception;
 
-    public abstract void onResponse(int id, Object object);
+    public abstract void onResponse(String tag, Object object);
 
 
 

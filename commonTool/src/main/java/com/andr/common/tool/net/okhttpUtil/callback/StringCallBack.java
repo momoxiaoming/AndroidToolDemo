@@ -13,7 +13,7 @@ public abstract class StringCallBack extends Callback
     }
 
     @Override
-    public String onParse(Response response, int id) throws IOException
+    public String onParse(Response response, String tag) throws IOException
     {
         if (response.body() == null)
         {
@@ -24,11 +24,11 @@ public abstract class StringCallBack extends Callback
     }
 
     @Override
-    public void onResponse(int id, Object object)
+    public void onResponse(String tag, Object object)
     {
-        onResponse(id,(String)object);
+        onResponse(tag,(String)object);
     }
 
-    public abstract void onResponse(int id, String res);
+    public abstract void onResponse(String tag, String res);
 }
 

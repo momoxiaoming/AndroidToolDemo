@@ -1,11 +1,11 @@
 package com.andr.common.tool.net.okhttpUtil;
 
+
 import com.andr.common.tool.net.okhttpUtil.builder.DownFileBuilder;
 import com.andr.common.tool.net.okhttpUtil.builder.FileBuilder;
 import com.andr.common.tool.net.okhttpUtil.builder.GetBuilder;
 import com.andr.common.tool.net.okhttpUtil.builder.PostBuilder;
 
-import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -33,11 +33,8 @@ public class OkHttpUtils
         {
             HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
             logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
             okHttpClient = new OkHttpClient.Builder()
-//                    .addInterceptor(new RetryInterceptor())
-
-                    //                    .addNetworkInterceptor(logInterceptor)   //打印请求的信息,缺点是会拖慢下载速度
+//                    .addNetworkInterceptor(logInterceptor)   //打印请求的信息,缺点是会拖慢下载速度
                     .connectTimeout(defultTimeOut, TimeUnit.MILLISECONDS).readTimeout(defultTimeOut, TimeUnit.MILLISECONDS).writeTimeout(defultTimeOut, TimeUnit.MILLISECONDS).build();
         } else
         {
@@ -68,45 +65,44 @@ public class OkHttpUtils
     public void cancelTag(String tag)
     {
 
-        Iterator v0 = this.okHttpClient.dispatcher().queuedCalls().iterator();
-        while (v0.hasNext())
-        {
-            Object item = v0.next();
-            if (!tag.equals(((Call) item).request().tag()))
-            {
-                continue;
+        if (tag == null) return;
+        for (Call call : OkHttpUtils.getInstance().getOkHttpClient().dispatcher().queuedCalls()) {
+            if (tag.equals(call.request().tag())) {
+                call.cancel();
             }
+        }
+        for (Call call : getOkHttpClient().dispatcher().runningCalls()) {
+            if (tag.equals(call.request().tag())) {
+                call.cancel();
+            }
+        }
+    }
 
-            ((Call) item).cancel();
+
+        public static PostBuilder post()
+        {
+            return new PostBuilder();
         }
 
-    }
+        public static GetBuilder get()
+        {
+            return new GetBuilder();
+        }
 
+        public static FileBuilder uploadFile()
+        {
+            return new FileBuilder();
+        }
 
-    public static PostBuilder post()
-    {
-        return new PostBuilder();
-    }
+        public static DownFileBuilder downFile()
+        {
+            return new DownFileBuilder();
+        }
 
-    public static GetBuilder get()
-    {
-        return new GetBuilder();
-    }
-
-    public static FileBuilder uploadFile()
-    {
-        return new FileBuilder();
-    }
-
-    public static DownFileBuilder downFile()
-    {
-        return new DownFileBuilder();
-    }
-
-    public OkHttpClient getOkHttpClient()
-    {
-        return okHttpClient;
-    }
+        public OkHttpClient getOkHttpClient()
+        {
+            return okHttpClient;
+        }
 
 
 }
