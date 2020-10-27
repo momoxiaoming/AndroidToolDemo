@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * <pre>
@@ -24,18 +23,24 @@ public class OkHttpUtils
 
     private static OkHttpUtils okHttpUtils;
     private OkHttpClient okHttpClient;
-    private int defultTimeOut = 5000;
+    private int defultConnectTimeOut = 30000;
+    private int defultWriteTimeOut = 20000;
+    private int defultReadTimeout = 15000;
 
 
     public OkHttpUtils(OkHttpClient client)
     {
         if (client == null)
         {
-            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
-            logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+//            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
+//            logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             okHttpClient = new OkHttpClient.Builder()
+                     .retryOnConnectionFailure(true)
 //                    .addNetworkInterceptor(logInterceptor)   //打印请求的信息,缺点是会拖慢下载速度
-                    .connectTimeout(defultTimeOut, TimeUnit.MILLISECONDS).readTimeout(defultTimeOut, TimeUnit.MILLISECONDS).writeTimeout(defultTimeOut, TimeUnit.MILLISECONDS).build();
+                    .connectTimeout(defultConnectTimeOut, TimeUnit.MILLISECONDS)
+                    .readTimeout(defultWriteTimeOut, TimeUnit.MILLISECONDS)
+                    .writeTimeout(defultReadTimeout, TimeUnit.MILLISECONDS)
+                    .build();
         } else
         {
             okHttpClient = client;
@@ -66,43 +71,72 @@ public class OkHttpUtils
     {
 
         if (tag == null) return;
-        for (Call call : OkHttpUtils.getInstance().getOkHttpClient().dispatcher().queuedCalls()) {
-            if (tag.equals(call.request().tag())) {
+        for (Call call : OkHttpUtils.getInstance().getOkHttpClient().dispatcher().queuedCalls())
+        {
+            if (tag.equals(call.request().tag()))
+            {
                 call.cancel();
             }
         }
-        for (Call call : getOkHttpClient().dispatcher().runningCalls()) {
-            if (tag.equals(call.request().tag())) {
+        for (Call call : getOkHttpClient().dispatcher().runningCalls())
+        {
+            if (tag.equals(call.request().tag()))
+            {
                 call.cancel();
             }
         }
     }
 
+    /**
+     * 取消tag标识请求
+     *
+     * @param tag
+     */
+    public boolean hasTag(String tag)
+    {
 
-        public static PostBuilder post()
+        if (tag == null) return false;
+        for (Call call : OkHttpUtils.getInstance().getOkHttpClient().dispatcher().queuedCalls())
         {
-            return new PostBuilder();
+            if (tag.equals(call.request().tag()))
+            {
+                return true;
+            }
         }
+        for (Call call : getOkHttpClient().dispatcher().runningCalls())
+        {
+            if (tag.equals(call.request().tag()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        public static GetBuilder get()
-        {
-            return new GetBuilder();
-        }
+    public static PostBuilder post()
+    {
+        return new PostBuilder();
+    }
 
-        public static FileBuilder uploadFile()
-        {
-            return new FileBuilder();
-        }
+    public static GetBuilder get()
+    {
+        return new GetBuilder();
+    }
 
-        public static DownFileBuilder downFile()
-        {
-            return new DownFileBuilder();
-        }
+    public static FileBuilder uploadFile()
+    {
+        return new FileBuilder();
+    }
 
-        public OkHttpClient getOkHttpClient()
-        {
-            return okHttpClient;
-        }
+    public static DownFileBuilder downFile()
+    {
+        return new DownFileBuilder();
+    }
+
+    public OkHttpClient getOkHttpClient()
+    {
+        return okHttpClient;
+    }
 
 
 }

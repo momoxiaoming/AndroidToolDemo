@@ -8,10 +8,6 @@ import com.andr.common.tool.net.okhttpUtil.callback.BeanCallback;
 import com.andr.common.tool.net.okhttpUtil.callback.Callback;
 
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -41,7 +37,8 @@ public class HttpRequestCall
     private boolean isOnMainThread;  //默认是回调到主线程
 
 
-    public HttpRequestCall(HttpRequest httpRequest, long defaultTimeOut, long readTimeOut, long conTimeOut, long writeTimeOut, boolean isOnMainThread)
+    public HttpRequestCall(HttpRequest httpRequest, long defaultTimeOut, long readTimeOut,
+                           long conTimeOut, long writeTimeOut, boolean isOnMainThread)
     {
         this.httpRequest = httpRequest;
         this.defaultTimeOut = defaultTimeOut;
@@ -59,7 +56,8 @@ public class HttpRequestCall
      */
     public void execute(final Callback callBack)
     {
-        this.request = this.httpRequest.onRequest(this.httpRequest.onRequestBody(this.httpRequest.onRequestBody(), callBack));
+        this.request =
+                this.httpRequest.onRequest(this.httpRequest.onRequestBody(this.httpRequest.onRequestBody(), callBack));
         if (request == null)
         {
             callBack.onFailure(httpRequest.getTag(), new Exception("请求对象为空!"), "请求对象为空!");
@@ -110,22 +108,18 @@ public class HttpRequestCall
                 try
                 {
                     throw e;
-                } catch (SocketTimeoutException e1)
+                }  catch (Exception e1)
                 {
                     e1.printStackTrace();
-                    sendFailure(tag, e, "服务器连接超时", callBack);
-                } catch (ConnectException e2)
-                {
-                    e2.printStackTrace();
-                    sendFailure(tag, e2, "连接异常,请检查网络", callBack);
-                }catch (UnknownHostException e3)
-                {
-                    e3.printStackTrace();
-                    sendFailure(tag, e3, "请求异常,请检查网络", callBack);
-                } catch (Exception e4)
-                {
-                    e4.printStackTrace();
-                    sendFailure(tag, e4, "请求异常,请检查网络", callBack);
+                    String msg=e.getMessage();
+                    if(msg.equals("Canceled")|| msg.equals("Socket closed")|| msg.equals("Socket is closed")){
+                        sendFailure(tag, e, "连接取消", callBack);
+                    }else if(msg.contains("No space left on device")){
+                        sendFailure(tag, e1, "磁盘空间不足", callBack);
+                    }else{
+                        sendFailure(tag, e1, "您的网络不可用,请检查网络", callBack);
+                    }
+
                 }
 
             }
@@ -141,32 +135,26 @@ public class HttpRequestCall
                     } else if (response.isSuccessful())
                     {
                         sendSucess(tag, callBack.onParse(response, tag), callBack);
-                    } else if (response.body() == null)
-                    {
-                        sendFailure(tag, new IOException("request failed ,response code is " + response.code()), "无响应内容", callBack);
-
                     } else
                     {
-                        sendFailure(tag, new IOException("request failed ,response code is " + response.code()), "请求失败,状态码 " + response.code(), callBack);
+                        sendFailure(tag,
+                                new IOException("request failed ,response code is " + response.code()), "您的网络不可用,请检查网络", callBack);
 
                     }
-                } catch (SocketTimeoutException e)
+                } catch (Exception e)
                 {
                     e.printStackTrace();
-                    sendFailure(tag, e, "连接超时", callBack);
-                } catch (ConnectException e)
-                {
-                    e.printStackTrace();
-                    sendFailure(tag, e, "连接异常", callBack);
-                } catch (SocketException e)
-                {
-                    e.printStackTrace();
-                    sendFailure(tag, e, "连接取消", callBack);
-                }  catch (Exception e)
-                {
-                    e.printStackTrace();
-                    sendFailure(tag, e, "请求异常", callBack);
-
+                    if (e.getMessage().contains("No space left on device"))
+                    {
+                        sendFailure(tag, e, "磁盘空间不足", callBack);
+                    } else if (e.getMessage().equals("Socket closed") || e.getMessage().equals(
+                            "Socket is closed"))
+                    {
+                        sendFailure(tag, e, "连接取消", callBack);
+                    } else
+                    {
+                        sendFailure(tag, e, "您的网络不可用,请检查网络", callBack);
+                    }
                 } finally
                 {
                     if (response.body() != null)
@@ -194,7 +182,8 @@ public class HttpRequestCall
     /**
      * 回到到主线程
      */
-    public void sendFailure(final String tag, final Exception exep, final String errmsg, final Callback callback)
+    public void sendFailure(final String tag, final Exception exep, final String errmsg,
+                            final Callback callback)
     {
 
         if (isOnMainThread)

@@ -8,6 +8,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -18,8 +20,11 @@ import com.andr.common.tool.encode.StrCharset;
 import com.andr.common.tool.log.LoggerUtil;
 import com.andr.common.tool.util.StringUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.core.content.FileProvider;
 
 /**
  * Created by zhangxiaoming on 2018/9/18.
@@ -208,7 +213,26 @@ public  class AppUtils
 
         return rlt;
     }
+    /**
+     * 安装应用.
+     *
+     * @param context Context
+     * @param
+     */
+    public static void installApp(Context context, File apkFile)
+    {
+        Intent install = new Intent(Intent.ACTION_VIEW);
+        install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context, context.getPackageName()+".provider", apkFile);
+            install.setDataAndType(contentUri, "application/vnd.android.package-archive");
+        } else {
+            install.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
+        }
 
+        context.startActivity(install);
+    }
 
     /**
      * 获取已安装的所有apk的信息

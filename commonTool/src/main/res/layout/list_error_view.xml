@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:gravity="center"
+	android:orientation="vertical">
+
+
+	<ImageView
+		android:id="@+id/image_error_view"
+		android:layout_width="50dp"
+		android:layout_height="50dp"
+		android:src="@drawable/app_icon" />
+
+	<TextView
+		android:id="@+id/text_error_view"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10dp"
+		android:text="网络开小差了！"
+		android:textColor="#656565"
+		android:textSize="14sp" />
+
+	<TextView
+		android:id="@+id/btn_error_view"
+		android:layout_width="100dp"
+		android:layout_height="35dp"
+		android:layout_marginTop="10dp"
+		android:background="@drawable/game_start_btn"
+		android:gravity="center"
+		android:text="重新加载"
+		android:textColor="#ffffff"
+		android:textSize="14sp" />
+</LinearLayout>

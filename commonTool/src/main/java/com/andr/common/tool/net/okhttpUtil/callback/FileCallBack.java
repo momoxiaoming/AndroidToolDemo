@@ -1,9 +1,6 @@
 package com.andr.common.tool.net.okhttpUtil.callback;
 
 
-import android.os.Handler;
-import android.os.Looper;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,7 +61,7 @@ public abstract class FileCallBack extends Callback
                 randomAccessFile.setLength(fileLength);
                 randomAccessFile.seek(postion);
 
-                byte[] buffer = new byte[1024 * 16];//缓冲数组16kB
+                byte[] buffer = new byte[1024*8 ];//缓冲数组32kB
                 int len = 0;
                 while ((len = v12.read(buffer)) != -1)
                 {
@@ -96,8 +93,7 @@ public abstract class FileCallBack extends Callback
 
     private void sendProgress(final String tag, final long total, final long index)
     {
-        new Handler(Looper.getMainLooper()).post(() -> FileCallBack.this.onProgress(tag, total, index));
-
+        FileCallBack.this.onProgress(tag, total, index);
     }
 }
 

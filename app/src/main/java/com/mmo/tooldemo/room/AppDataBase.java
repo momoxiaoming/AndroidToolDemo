@@ -1,15 +1,13 @@
 package com.mmo.tooldemo.room;
 
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.Room;
-import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-import com.mmo.tooldemo.ICheckApple;
 import com.mmo.tooldemo.room.dao.UserDao;
 import com.mmo.tooldemo.room.entity.User;
 
-import org.qiyi.video.svg.Andromeda;
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
 
 /**
  * <pre>
@@ -36,7 +34,6 @@ public abstract class AppDataBase extends RoomDatabase
             {
                 INSTANCE = Room.databaseBuilder(context, AppDataBase.class, "user.db").allowMainThreadQueries().build();
 
-                ICheckApple checkApple = Andromeda.getLocalService(ICheckApple.class);
 
             }
             return INSTANCE;

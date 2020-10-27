@@ -4,7 +4,7 @@ import android.app.Application;
 
 import com.andr.common.tool.log.LoggerUtil;
 
-import org.qiyi.video.svg.Andromeda;
+
 
 import java.io.File;
 
@@ -21,7 +21,7 @@ public class TestApplication extends Application
     public void onCreate()
     {
         super.onCreate();
-        Andromeda.init(this);
+
         File file = new File(getFilesDir() + File.separator + "log");
 
         if(!file.exists()||!file.isDirectory()){

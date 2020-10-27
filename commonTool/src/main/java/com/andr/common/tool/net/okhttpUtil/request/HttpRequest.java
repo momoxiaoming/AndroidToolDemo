@@ -1,8 +1,8 @@
 package com.andr.common.tool.net.okhttpUtil.request;
 
 
-import com.andr.common.tool.util.StringUtil;
 import com.andr.common.tool.net.okhttpUtil.callback.Callback;
+import com.andr.common.tool.util.StringUtil;
 
 import java.util.HashMap;
 
